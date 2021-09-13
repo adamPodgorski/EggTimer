@@ -11,22 +11,27 @@ namespace EggTimer
         private WebDriverWait wait;
         private IWebDriver driver;
 
+        EggHome homePage;
+        EggResult resultPage;
+
+        [SetUp]
+        public void SetupDriver()
+        {
+            driver = new ChromeDriver();
+            driver.Url = url;
+            homePage = new EggHome();
+            PageFactory.InitElements(driver, homePage);
+        }
+
         [TestCase(25,1)]
         public void TestEggCustomTimer(int timeToWait,int interval)
         {
-            driver = new ChromeDriver();
-            wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(interval));
-            driver.Url = url;
-
-            
-            var homePage = new EggHome();
-            PageFactory.InitElements(driver, homePage);
+            wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(interval));           
 
             homePage.TimerInput.SendKeys(timeToWait.ToString());
             homePage.CountStarterButton.Click();
             
-
-            var resultPage = new EggResult();
+            resultPage = new EggResult();
             PageFactory.InitElements(driver, resultPage);
 
             for (var x = timeToWait; x > 0; x--)
@@ -38,6 +43,25 @@ namespace EggTimer
             IAlert alert = driver.SwitchTo().Alert();
             alert.Accept();
             Assert.IsTrue(resultPage.EggResultText.Displayed);
+        }
+
+        [Test]
+        public void validatePageElements()
+        {
+            Assert.IsTrue(homePage.TimerInput.Displayed);
+            Assert.IsTrue(homePage.CountStarterButton.Displayed);
+            Assert.IsTrue(homePage.FiveMinutesButton.Displayed);
+            Assert.IsTrue(homePage.TenMinutesButton.Displayed);
+            Assert.IsTrue(homePage.FiveTeenMinutesButton.Displayed);
+            Assert.IsTrue(homePage.PomodoroButton.Displayed);
+            Assert.IsTrue(homePage.TabataButton.Displayed);
+            Assert.IsTrue(homePage.MorningButton.Displayed);
+        }
+
+        [TearDown]
+        public void CloseDriver()
+        {
+            driver.Close();
         }
     }
 }
